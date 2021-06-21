@@ -142,9 +142,9 @@ class Question:
     The correct answer choice is meant to fill in the blank and logically complete the sentence.
     """
 
-    blank_sentence:str = ""
-    choices:list[str] = None
-    answer:str = ""
+    blank_sentence:str
+    choices:list[str]
+    answer:str
 
     def __repr__(self):
         """
@@ -165,25 +165,22 @@ def random_question(num_options:int=5) -> Question:
     Builds a Question where the correct answer is a random word.
     Picks num_options - 1 other words with the same part of speech as incorrect answer choices.
     """
-
-    # Question object to return 
-    question = Question()
-
     # Load in all the words
     words_df = pickle.load(open("words_dataframe.pkl", 'rb'))
 
     # Pick a random word to be the answer
     rand_word = words_df.loc[randint(0, len(words_df) - 1)]
-    question.answer = rand_word['word']
+    answer = rand_word['word']
 
     # Remove the answer from the example sentence
-    question.blank_sentence = rand_word['example_sentence'].replace(question.answer, "__________")
+    blank_sentence = rand_word['example_sentence'].replace(answer, "__________")
 
     # Get all the other words with the same part of speech as the answer
-    same_pos = words_df.query(f"part_of_speech == '{rand_word['part_of_speech']}' & word != '{rand_word['word']}'")
+    same_pos:pd.DataFrame = words_df.query(f"part_of_speech == '{rand_word['part_of_speech']}' & word != '{rand_word['word']}'")
 
     # Generate num_options - 1 more incorrect answer choices
-    question.choices = [same_pos.iloc[randint(0, len(same_pos) - 1)]['word'] for _ in range(1, num_options)]
-    question.choices.append(question.answer)
+    choices = [same_pos.iloc[randint(0, len(same_pos) - 1)]['word'] for _ in range(1, num_options)]
+    choices.append(answer)
 
-    return question
+    # Return the question
+    return Question(blank_sentence, choices, answer)
