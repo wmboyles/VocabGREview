@@ -5,7 +5,7 @@ from random import randint, shuffle
 
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 
 @dataclass
@@ -14,15 +14,15 @@ class DefinedWord:
     A DefinedWord is an entry for a word in the dictionary, including the word's part of speech, definition, example sentence, and synonyms.
     If a word has multiple definitions, this object only represents one such definition.
     """
-    
-    word:str
-    part_of_speech:str
-    definition:str
-    example_sentence:str
-    synonyms:list[str]
+
+    word: str
+    part_of_speech: str
+    definition: str
+    example_sentence: str
+    synonyms: list[str]
 
 
-def define_word(word:str, language:str="en_US") -> list[DefinedWord]:
+def define_word(word: str, language: str = "en_US") -> list[DefinedWord]:
     """
     Given a word, call the dictionary API to get its dictionary entry.
     For each possible meaning of the word returned from the API, construct a DefinedWord object.
@@ -34,29 +34,32 @@ def define_word(word:str, language:str="en_US") -> list[DefinedWord]:
     try:
         res = requests.get(url).json()[0]
     except KeyError:
-        # This should probably be done with actual logging
+        # TODO: This should probably be done with actual logging
         print(f"WARNING: Could not properly define {word} in {language}")
 
         return []
 
-    wordList = []
-    meanings = res['meanings']
+    wordList: list[DefinedWord] = []
+    meanings = res["meanings"]
 
     for meaning in meanings:
-        part_of_speech = meaning['partOfSpeech']
+        part_of_speech = meaning["partOfSpeech"]
 
-        definitions = meaning['definitions']
+        definitions: list[dict] = meaning["definitions"]
         for definition in definitions:
-            adefinition = definition['definition']
-            example_sentence = definition.get('example', "")
-            synonyms = definition.get('synonyms', [])
+            adefinition = definition["definition"]
+            example_sentence = definition.get("example", "")
+            synonyms = definition.get("synonyms", [])
 
-            defined_word = DefinedWord(word, part_of_speech, adefinition, example_sentence, synonyms)
+            defined_word = DefinedWord(
+                word, part_of_speech, adefinition, example_sentence, synonyms
+            )
             wordList.append(defined_word)
-    
+
     return wordList
 
-def scrape_words(outpath:str="words.csv"):
+
+def scrape_words(outpath: str = "words.csv"):
     """
     Scrape all the tables of GRE words on GraduateShotOnline.
     Return thewords in all these tables in a single list.
@@ -67,7 +70,7 @@ def scrape_words(outpath:str="words.csv"):
     num_tables = 5
 
     # CSV writing items
-    outfile = open(outpath, 'w', encoding="utf-8", newline='')
+    outfile = open(outpath, "w", encoding="utf-8", newline="")
     writer = csv.writer(outfile)
 
     # Write the first row as column name
@@ -77,16 +80,19 @@ def scrape_words(outpath:str="words.csv"):
         url = f"https://www.graduateshotline.com/gre/load.php?file=list{table}.html"
         res = requests.get(url)
 
-        soup = BeautifulSoup(res.text, 'html.parser')
-        table_rows = soup.find('table').find_all('tr')
-        
+        soup = BeautifulSoup(res.text, "html.parser")
+        table_rows: list[Tag] = soup.find("table").find_all("tr")
+
         for row in table_rows:
-            word = row.find('td').find('a').text.split()[0].lower()
+            word = row.find("td").find("a").text.split()[0].lower()
             writer.writerow([word])
 
     outfile.close()
 
-def compile_words(wordspath:str="words.csv", outpath:str="words_dataframe.pkl") -> pd.DataFrame:
+
+def compile_words(
+    wordspath: str = "words.csv", outpath: str = "words_dataframe.pkl"
+) -> pd.DataFrame:
     """
     Define all words in the wordspath file.
     If the word is already defined in words_dataframe.pkl, we will not call the API again.
@@ -95,15 +101,15 @@ def compile_words(wordspath:str="words.csv", outpath:str="words_dataframe.pkl") 
 
     # Open existing dataframe, if it exists
     try:
-        with open(outpath, 'rb') as existing_words_file:
-            defined_words_df:pd.DataFrame = pickle.load(existing_words_file)
+        with open(outpath, "rb") as existing_words_file:
+            defined_words_df: pd.DataFrame = pickle.load(existing_words_file)
     except FileNotFoundError:
         defined_words_df = None
 
     # Open csv file of words as dataframe
     with open(wordspath) as wordsfile:
-        wordlist_df:pd.DataFrame = pd.read_csv(wordsfile)
-    
+        wordlist_df: pd.DataFrame = pd.read_csv(wordsfile)
+
     # List of words that haven't been defined yet
     defined_wordlist = []
 
@@ -116,8 +122,8 @@ def compile_words(wordspath:str="words.csv", outpath:str="words_dataframe.pkl") 
                 continue
 
         # Otherwise, define the word and append all its definitions
-        for defined_word in define_word(row['word']):
-           defined_wordlist.append(defined_word.__dict__)
+        for defined_word in define_word(row["word"]):
+            defined_wordlist.append(defined_word.__dict__)
 
     # Dataframe of newly defined words
     # It's less expensive to create new dataframe and add everything at once
@@ -130,10 +136,11 @@ def compile_words(wordspath:str="words.csv", outpath:str="words_dataframe.pkl") 
         defined_words_df = defined_words_df.append(newly_defined_word_df)
 
     # Serialize results
-    with open(outpath, 'wb') as picklefile:
+    with open(outpath, "wb") as picklefile:
         pickle.dump(defined_words_df, picklefile)
 
     return defined_words_df
+
 
 @dataclass
 class Question:
@@ -142,9 +149,9 @@ class Question:
     The correct answer choice is meant to fill in the blank and logically complete the sentence.
     """
 
-    blank_sentence:str
-    choices:list[str]
-    answer:str
+    blank_sentence: str
+    choices: list[str]
+    answer: str
 
     def __repr__(self):
         """
@@ -152,34 +159,41 @@ class Question:
         """
 
         parts = [f"{self.blank_sentence}\n"]
-        parts += [f"{chr(i + ord('A'))}. {self.choices[i]}" for i in range(len(self.choices))]
+        parts += [
+            f"{chr(i + ord('A'))}. {self.choices[i]}" for i in range(len(self.choices))
+        ]
 
-        return '\n'.join(parts)
+        return "\n".join(parts)
 
 
-def random_question(num_options:int=5) -> Question:
+def random_question(num_options: int = 5) -> Question:
     """
     Builds a Question where the correct answer is a random word.
     Picks num_options - 1 other words with the same part of speech as incorrect answer choices.
     """
 
     # Load in all the words
-    words_df = pickle.load(open("words_dataframe.pkl", 'rb'))
+    words_df: pd.DataFrame = pickle.load(open("words_dataframe.pkl", "rb"))
 
     # Pick a random word to be the answer
-    rand_word = words_df.loc[randint(0, len(words_df) - 1)]
-    answer = rand_word['word']
+    rand_word: pd.DataFrame = words_df.loc[randint(0, len(words_df) - 1)]
+    answer = rand_word["word"]
 
     # Remove the answer from the example sentence
-    blank_sentence = rand_word['example_sentence'].replace(answer, "__________")
+    blank_sentence = rand_word["example_sentence"].replace(answer, "__________")
 
     # Get all the other words with the same part of speech as the answer
-    same_pos:pd.DataFrame = words_df.query(f"part_of_speech == '{rand_word['part_of_speech']}' & word != '{rand_word['word']}'")
+    same_pos: pd.DataFrame = words_df.query(
+        f"part_of_speech == '{rand_word['part_of_speech']}' & word != '{rand_word['word']}'"
+    )
 
     # Generate num_options - 1 more incorrect answer choices
-    choices = [same_pos.iloc[randint(0, len(same_pos) - 1)]['word'] for _ in range(1, num_options)]
+    choices = [
+        same_pos.iloc[randint(0, len(same_pos) - 1)]["word"]
+        for _ in range(1, num_options)
+    ]
     choices.append(answer)
-    
+
     shuffle(choices)
 
     # Return the question
