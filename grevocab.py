@@ -149,10 +149,7 @@ class Question:
     def __repr__(self):
         """
         Prints a question and its choices out, like one might see on a test.
-        Choices are shuffled, so printing the same question twice will likely have the answer choices in a different order.
         """
-
-        shuffle(self.choices)
 
         parts = [f"{self.blank_sentence}\n"]
         parts += [f"{chr(i + ord('A'))}. {self.choices[i]}" for i in range(len(self.choices))]
@@ -165,6 +162,7 @@ def random_question(num_options:int=5) -> Question:
     Builds a Question where the correct answer is a random word.
     Picks num_options - 1 other words with the same part of speech as incorrect answer choices.
     """
+
     # Load in all the words
     words_df = pickle.load(open("words_dataframe.pkl", 'rb'))
 
@@ -181,6 +179,8 @@ def random_question(num_options:int=5) -> Question:
     # Generate num_options - 1 more incorrect answer choices
     choices = [same_pos.iloc[randint(0, len(same_pos) - 1)]['word'] for _ in range(1, num_options)]
     choices.append(answer)
+    
+    shuffle(choices)
 
     # Return the question
     return Question(blank_sentence, choices, answer)
