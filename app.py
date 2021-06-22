@@ -13,6 +13,10 @@ DEFINITIONS_FILEPATH = "words_dataframe.pkl"
 
 @app.route("/define/<string:word>", methods=["GET"])
 def define_word(word: str):
+    """
+    Given a word, looks up entries for it saved in DEFINITIONS_FILEPATH.
+    """
+
     with open(DEFINITIONS_FILEPATH, "rb") as definitions_file:
         # Load in list of all definitions
         definitions: pd.DataFrame = pickle.load(definitions_file)
@@ -29,6 +33,10 @@ def define_word(word: str):
 
 @app.route("/question/<string:answer>", methods=["GET"])
 def make_question(answer: str, num_options: int = 5):
+    """
+    Make a question with a given word as the answer.
+    """
+
     with open(DEFINITIONS_FILEPATH, "rb") as definitions_file:
         definitions: pd.DataFrame = pickle.load(definitions_file)
 
@@ -58,6 +66,10 @@ def make_question(answer: str, num_options: int = 5):
 
 @app.route("/question", methods=["GET"])
 def random_question(num_options: int = 5):
+    """
+    Make a question with a random word as the answer.
+    """
+
     with open(DEFINITIONS_FILEPATH, "rb") as definitions_file:
         definitions: pd.DataFrame = pickle.load(definitions_file)
 
