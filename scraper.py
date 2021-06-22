@@ -1,25 +1,11 @@
 import csv
 import pickle
-from dataclasses import dataclass
-from random import randint, shuffle
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup, Tag
 
-
-@dataclass
-class DefinedWord:
-    """
-    A DefinedWord is an entry for a word in the dictionary, including the word's part of speech, definition, example sentence, and synonyms.
-    If a word has multiple definitions, this object only represents one such definition.
-    """
-
-    word: str
-    part_of_speech: str
-    definition: str
-    example_sentence: str
-    synonyms: list[str]
+from models import DefinedWord
 
 
 def define_word(word: str, language: str = "en_US") -> list[DefinedWord]:
@@ -115,11 +101,11 @@ def compile_words(
 
     for _, row in wordlist_df.iterrows():
         # If we've already defined the word, no need to do it again
-        if defined_words_df is not None:
-            word_query = defined_words_df.query(f"word == '{row['word']}'")
-
-            if word_query.empty:
-                continue
+        if (
+            defined_words_df is not None
+            and defined_words_df.query(f"word == '{row['word']}'").empty
+        ):
+            continue
 
         # Otherwise, define the word and append all its definitions
         for defined_word in define_word(row["word"]):
@@ -140,61 +126,3 @@ def compile_words(
         pickle.dump(defined_words_df, picklefile)
 
     return defined_words_df
-
-
-@dataclass
-class Question:
-    """
-    A Question contains sentence with one word replaced with a blank and some answer choices.
-    The correct answer choice is meant to fill in the blank and logically complete the sentence.
-    """
-
-    blank_sentence: str
-    choices: list[str]
-    answer: str
-
-    def __repr__(self):
-        """
-        Prints a question and its choices out, like one might see on a test.
-        """
-
-        parts = [f"{self.blank_sentence}\n"]
-        parts += [
-            f"{chr(i + ord('A'))}. {self.choices[i]}" for i in range(len(self.choices))
-        ]
-
-        return "\n".join(parts)
-
-
-def random_question(num_options: int = 5) -> Question:
-    """
-    Builds a Question where the correct answer is a random word.
-    Picks num_options - 1 other words with the same part of speech as incorrect answer choices.
-    """
-
-    # Load in all the words
-    words_df: pd.DataFrame = pickle.load(open("words_dataframe.pkl", "rb"))
-
-    # Pick a random word to be the answer
-    rand_word: pd.DataFrame = words_df.loc[randint(0, len(words_df) - 1)]
-    answer = rand_word["word"]
-
-    # Remove the answer from the example sentence
-    blank_sentence = rand_word["example_sentence"].replace(answer, "__________")
-
-    # Get all the other words with the same part of speech as the answer
-    same_pos: pd.DataFrame = words_df.query(
-        f"part_of_speech == '{rand_word['part_of_speech']}' & word != '{rand_word['word']}'"
-    )
-
-    # Generate num_options - 1 more incorrect answer choices
-    choices = [
-        same_pos.iloc[randint(0, len(same_pos) - 1)]["word"]
-        for _ in range(1, num_options)
-    ]
-    choices.append(answer)
-
-    shuffle(choices)
-
-    # Return the question
-    return Question(blank_sentence, choices, answer)
