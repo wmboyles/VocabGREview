@@ -2,7 +2,7 @@ import pickle
 from random import randint, shuffle
 
 import pandas as pd
-from flask import Flask
+from flask import Flask, render_template
 
 from models import Question
 
@@ -76,6 +76,11 @@ def random_question(num_options: int = 5):
     rand_word = definitions.loc[randint(0, len(definitions) - 1)]
 
     return make_question(rand_word["word"], num_options)
+
+
+@app.route("/")
+def view_page():
+    return render_template("page.html")
 
 
 app.run(debug=True)
