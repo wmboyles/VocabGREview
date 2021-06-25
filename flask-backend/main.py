@@ -80,7 +80,7 @@ def random_question(num_options: int = 5):
 
 @app.route("/")
 def view_page():
-    return render_template("page.html")
+    return render_template("index.html")
 
 
 app.run(debug=True)
