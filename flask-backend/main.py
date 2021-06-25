@@ -80,7 +80,7 @@ def random_question(num_options: int = 5):
 
 @app.route("/")
 def view_page():
-    return render_template("index.html")
+    return render_template("index.html", flask_token="Hello, World!")
 
 
 app.run(debug=True)
