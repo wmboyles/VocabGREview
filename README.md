@@ -2,11 +2,20 @@
 
 VocabGREview is a website to help you review vocabulary words like you might find on the GRE.
 
-## Flask Backend
+## How to Run
 
-The backend API is written in Python with Flask.
-Webpages are rendered with Flask render templates.
+If the Flask server is currently running in debug mode and you make any changes to Flask .py files, the Flask server will automatically restart.
+If you have not yet started the Flask server, you can do so by going to the `python-backend` folder and running
 
-## React Frontend
+```bash
+py main.py
+```
 
-The frontend is written in React.
+If you made any changes to React components, you'll need to build the project so that Flask can serve your changes.
+Do this by going to the `react-frontend` folder and running
+
+```bash
+npm run build
+```
+
+If your Flask server is already running, these new changes will automatically be picked up by the Flask server without needing to restart it.
