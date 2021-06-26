@@ -2,16 +2,21 @@ import pickle
 from random import randint, shuffle
 
 import pandas as pd
-from flask import Flask, render_template
+from flask import Blueprint
 
-from models import Question
+from .models import Question
 
-app = Flask(__name__)
+DEFINITIONS_FILEPATH = "flask_backend/words_dataframe.pkl"
 
-DEFINITIONS_FILEPATH = "words_dataframe.pkl"
+api = Blueprint(
+    "api",
+    __name__,
+    static_folder="flask_backend/static",
+    template_folder="flask_backend/templates",
+)
 
 
-@app.route("/define/<string:word>", methods=["GET"])
+@api.route("/define/<string:word>", methods=["GET"])
 def define_word(word: str):
     """
     Given a word, looks up entries for it saved in DEFINITIONS_FILEPATH.
@@ -31,7 +36,7 @@ def define_word(word: str):
     return word_definition.to_json()
 
 
-@app.route("/question/<string:answer>", methods=["GET"])
+@api.route("/question/<string:answer>", methods=["GET"])
 def make_question(answer: str, num_options: int = 5):
     """
     Make a question with a given word as the answer.
@@ -64,7 +69,7 @@ def make_question(answer: str, num_options: int = 5):
     return question.__dict__
 
 
-@app.route("/question", methods=["GET"])
+@api.route("/question", methods=["GET"])
 def random_question(num_options: int = 5):
     """
     Make a question with a random word as the answer.
@@ -76,14 +81,3 @@ def random_question(num_options: int = 5):
     rand_word = definitions.loc[randint(0, len(definitions) - 1)]
 
     return make_question(rand_word["word"], num_options)
-
-
-@app.route("/")
-def view_page():
-    return render_template(
-        "index.html",
-        page_title="VocabGREview",
-    )
-
-
-app.run(debug=True)

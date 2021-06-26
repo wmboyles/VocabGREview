@@ -17,7 +17,7 @@ function Question() {
 
   // Calls API
   function loadQuestion() {
-    fetch("/question")
+    fetch("/api/question")
       .then((res) => res.json())
       .then((data) => {
         setQuestion(data);
