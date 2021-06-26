@@ -38,7 +38,12 @@ function Question() {
           <hr class="my-4" />
           <div class="container col-lg-10">
             {question.choices.map((c) => (
-              <AnswerChoice key={c.id} choice={c} checkAnswer={checkAnswer} />
+              <AnswerChoice
+                key={c.id}
+                choice={c}
+                checkAnswer={checkAnswer}
+                hooks={[loadQuestion]}
+              />
             ))}
           </div>
         </div>

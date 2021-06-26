@@ -1,27 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function AnswerChoice(props) {
   // Handles checking of answer is correct whwn button is clicked
-  var [correct, setCorrect] = useState(null);
+  var [color, setColor] = useState("secondary");
   function handleClick(event) {
-    setCorrect(props.checkAnswer(event));
+    if (props.checkAnswer(event)) {
+      setColor("success");
+    } else {
+      setColor("danger");
+    }
   }
 
-  // Sets button color based on correctness
-  var btnColor;
-  if (correct == null) {
-    btnColor = "secondary";
-  } else if (correct) {
-    btnColor = "success";
-  } else {
-    btnColor = "danger";
-  }
+  // Whenever any function in props.hooks is called, color is reset
+  useEffect(() => {
+    setColor("secondary");
+  }, props.hooks);
 
   return (
     <button
-      class={"btn btn-" + btnColor + " btn-block"}
+      class={"btn btn-" + color + " btn-block"}
       onClick={handleClick}
-      disabled={correct != null}
+      disabled={color != "secondary"}
     >
       {props.choice}
     </button>
