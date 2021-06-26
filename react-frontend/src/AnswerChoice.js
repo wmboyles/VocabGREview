@@ -4,7 +4,7 @@ function AnswerChoice(props) {
   // Handles checking of answer is correct whwn button is clicked
   var [correct, setCorrect] = useState(null);
   function handleClick(event) {
-    setCorrect(props.handleClick(event));
+    setCorrect(props.checkAnswer(event));
   }
 
   // Sets button color based on correctness

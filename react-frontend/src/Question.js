@@ -11,12 +11,12 @@ function Question() {
   });
 
   // This handles an answer choice being clicked by returning if the choice was correct
-  function handleClick(event) {
+  function checkAnswer(event) {
     return event.target.innerText == question.answer;
   }
 
-  // This calls the API when the component loads and sets question data
-  useEffect(() => {
+  // Calls API
+  function loadQuestion() {
     fetch("/question")
       .then((res) => res.json())
       .then((data) => {
@@ -25,17 +25,29 @@ function Question() {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  }
+
+  // Calls API on component load
+  useEffect(loadQuestion, []);
 
   return (
-    <div class="jumbotron jumbotron-fluid">
-      <div class="container">
-        <p class="lead">{question.blank_sentence}</p>
-        <hr class="my-4" />
-        <div class="container col-lg-10">
-          {question.choices.map((c) => (
-            <AnswerChoice key={c.id} choice={c} handleClick={handleClick} />
-          ))}
+    <div>
+      <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+          <p class="lead">{question.blank_sentence}</p>
+          <hr class="my-4" />
+          <div class="container col-lg-10">
+            {question.choices.map((c) => (
+              <AnswerChoice key={c.id} choice={c} checkAnswer={checkAnswer} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <button class="btn btn-secondary btn-block" onClick={loadQuestion}>
+            Next Question
+          </button>
         </div>
       </div>
     </div>
