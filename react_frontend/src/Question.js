@@ -12,7 +12,7 @@ function Question() {
 
   // This handles an answer choice being clicked by returning if the choice was correct
   function checkAnswer(event) {
-    return event.target.innerText == question.answer;
+    return event.target.innerText === question.answer;
   }
 
   // Calls API

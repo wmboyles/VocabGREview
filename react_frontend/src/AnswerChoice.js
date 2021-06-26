@@ -20,7 +20,7 @@ function AnswerChoice(props) {
     <button
       class={"btn btn-" + color + " btn-block"}
       onClick={handleClick}
-      disabled={color != "secondary"}
+      disabled={color !== "secondary"}
     >
       {props.choice}
     </button>
