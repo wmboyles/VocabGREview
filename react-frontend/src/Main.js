@@ -6,9 +6,7 @@ function Main() {
       <Question />
       <div class="row">
         <div class="col">
-          <button class="btn btn-secondary btn-block" ng-click="getQuestion()">
-            Next Question
-          </button>
+          <button class="btn btn-secondary btn-block">Next Question</button>
         </div>
       </div>
     </main>
