@@ -2,7 +2,7 @@
 
 Flask==2.0.1
 pandas==1.2.4
-
+gunicorn==20.1.0
 
 # These are the additional packages required for scraping
 # beautifulsoup4==4.9.3
