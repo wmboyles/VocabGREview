@@ -1,0 +1,10 @@
+# These are the packages required for deployment.
+
+Flask==2.0.1
+pandas==1.2.4
+
+
+# These are the additional packages required for scraping
+# beautifulsoup4==4.9.3
+# bs4==0.0.1
+# requests==2.25.1
