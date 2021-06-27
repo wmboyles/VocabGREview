@@ -5,7 +5,7 @@ function Navbar() {
         <a class="navbar-brand" href="/">
           VocabGREview
         </a>
-        <button
+        {/* <button
           class="navbar-toggler"
           type="button"
           data-toggle="collapse"
@@ -19,7 +19,7 @@ function Navbar() {
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-            {/* <li class="nav-item">
+            <li class="nav-item">
               <a class="nav-link" href="/">
                 Some Page
               </a>
@@ -28,9 +28,9 @@ function Navbar() {
               <a class="nav-link" href="/">
                 Other Page
               </a>
-            </li> */}
+            </li>
           </ul>
-        </div>
+        </div> */}
       </div>
     </nav>
   );
